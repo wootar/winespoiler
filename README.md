@@ -1,5 +1,6 @@
 # WineSpoiler
 ### NOTE: This project is experimental.
+![Example of WineSpoiler corrupting the menu screen of Extreme Tux Racer](example.png)
 
 Yet another game corrupter but for Linux, Also works with wine hence it's name.
 
