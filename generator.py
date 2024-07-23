@@ -42,8 +42,8 @@ for i in os.walk("hooks"):
     for file in i[2]:
         funcname = file[0:len(file)-4]
         sys.stderr.write(f"Importing {funcname}\n")
-        generated += appendFile(f"{i[0]}/"+file)
+        generated += f"#ifndef NO_{funcname}\n"+appendFile(f"{i[0]}/"+file)+"\n#endif\n"
         # TODO: replace "void *" here due to functions varying
-        ifs += f"   if(strcmp(symbol,\"{funcname}\") == 0) {'{'}return reinterpret_cast<void *>(&{funcname});{'}'};\n"
+        ifs += f"#ifndef NO_{funcname}\n   if(strcmp(symbol,\"{funcname}\") == 0) {'{'}return reinterpret_cast<void *>(&{funcname});{'}'};\n#endif\n"
 
 sys.stdout.write(generated+"\n"+hookcpp_end.replace("REPLACEMECPP",ifs))
