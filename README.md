@@ -1,7 +1,7 @@
 # WineSpoiler
 ### NOTE: This project is experimental.
 
-Yet another game courrupter but for Linux, Also works with wine hence it's name.
+Yet another game corrupter but for Linux, Also works with wine hence it's name.
 
 # Requirements
 > Note: glibc is mandatory, this may change later down the line by adding support to musl via an patch.
