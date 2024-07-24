@@ -3,7 +3,5 @@ void glTexImage2D(GLenum target,GLint level,GLint internalFormat,GLsizei width,G
 	width--;
 	height--;
 	// 4 bytes of luck
-	const void *garbage = malloc(width*height*4);
-	if(realFlush != NULL) realFlush(target,level,internalFormat,width,height,border,format,type,garbage);
-	free(garbage);
+	if(realFlush != NULL) realFlush(target,level,internalFormat,width,height,border,format,type,data);
 };

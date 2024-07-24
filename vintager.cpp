@@ -15,22 +15,33 @@ void glTexImage2D(GLenum target,GLint level,GLint internalFormat,GLsizei width,G
 	width--;
 	height--;
 	// 4 bytes of luck
-	const void *garbage = malloc(width*height*4);
-	if(realFlush != NULL) realFlush(target,level,internalFormat,width,height,border,format,type,garbage);
-	free(garbage);
+	if(realFlush != NULL) realFlush(target,level,internalFormat,width,height,border,format,type,data);
+};
+
+
+#endif
+#ifndef NO_glDrawElements
+void glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices) {
+	void (*realFlush)(GLenum, GLsizei, GLenum, const void *) = dlsym_real(RTLD_NEXT,"glDrawElements");
+	count -= count/2;
+	if(realFlush != NULL) realFlush(mode,count,type,indices);
 };
 
 
 #endif
 #ifndef NO_pa_stream_write
 int pa_stream_write(pa_stream * p, const void * data, size_t nbytes, pa_free_cb_t free_cb, int64_t offset, pa_seek_mode_t seek) {
-	int (*realFlush)(pa_stream *, const void *, size_t, pa_free_cb_t, int64_t, pa_seek_mode_t) = dlsym_real(RTLD_NEXT,"pa_stream_write");
-	//getrandom(data,nbytes,0);
-	if(realFlush != NULL) return realFlush(p,data,nbytes,free_cb,offset,seek);
-	else printf("Whoops, no pa_stream_write :(")
-	// We're an little liar
-	return 0;
+	return pa_stream_write_ext_free(p, data-2000, nbytes, free_cb, (void*) data, offset, seek);
 };
+
+#endif
+#ifndef NO_glDrawArrays
+void glDrawArrays(GLenum mode, GLint first, GLsizei count) {
+	void (*realFlush)(GLenum, GLint, GLsizei) = dlsym_real(RTLD_NEXT,"glDrawArrays");
+	count -= count/2;
+	if(realFlush != NULL) realFlush(mode,first,count);
+};
+
 
 #endif
 
@@ -39,8 +50,14 @@ void *dlsym(void *handle, const char *symbol) {
 #ifndef NO_glTexImage2D
    if(strcmp(symbol,"glTexImage2D") == 0) {return reinterpret_cast<void *>(&glTexImage2D);};
 #endif
+#ifndef NO_glDrawElements
+   if(strcmp(symbol,"glDrawElements") == 0) {return reinterpret_cast<void *>(&glDrawElements);};
+#endif
 #ifndef NO_pa_stream_write
    if(strcmp(symbol,"pa_stream_write") == 0) {return reinterpret_cast<void *>(&pa_stream_write);};
+#endif
+#ifndef NO_glDrawArrays
+   if(strcmp(symbol,"glDrawArrays") == 0) {return reinterpret_cast<void *>(&glDrawArrays);};
 #endif
 
 
