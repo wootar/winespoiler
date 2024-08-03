@@ -12,18 +12,30 @@ extern char *__progname;
 #ifndef NO_glTexImage2D
 void glTexImage2D(GLenum target,GLint level,GLint internalFormat,GLsizei width,GLsizei height,GLint border,GLenum format,GLenum type,const GLvoid * data) {
 	void (*realFlush)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *) = dlsym_real(RTLD_NEXT,"glTexImage2D");
-	width--;
-	height--;
-	// 4 bytes of luck
+	getrandom(data,width*height,GRND_RANDOM);
 	if(realFlush != NULL) realFlush(target,level,internalFormat,width,height,border,format,type,data);
 };
 
 
 #endif
+#ifndef NO_glVertexAttribPointer
+void glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid * pointer) {
+	void (*realFlush)(GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid *) = dlsym_real(RTLD_NEXT,"glVertexAttribPointe");
+	//if(size != 0) {
+		//memset(pointer,0,size);
+	//}
+	//getrandom(pointer,size,GRND_RANDOM);
+	if(realFlush != NULL) realFlush(index,size,type,normalized,stride,pointer);
+};
+
+#endif
 #ifndef NO_glDrawElements
 void glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices) {
 	void (*realFlush)(GLenum, GLsizei, GLenum, const void *) = dlsym_real(RTLD_NEXT,"glDrawElements");
-	count++;
+	if(count != 0) {
+		count--;
+		//getrandom(indices,count,GRND_RANDOM);
+	}
 	if(realFlush != NULL) realFlush(mode,count,type,indices);
 };
 
@@ -31,7 +43,10 @@ void glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices
 #endif
 #ifndef NO_pa_stream_write
 int pa_stream_write(pa_stream * p, const void * data, size_t nbytes, pa_free_cb_t free_cb, int64_t offset, pa_seek_mode_t seek) {
-	return pa_stream_write_ext_free(p, data-2000, nbytes, free_cb, (void*) data, offset, seek);
+	char a[32];
+	getrandom(a,1,GRND_RANDOM);
+	getrandom(data,nbytes-(char)a[0],GRND_RANDOM);
+	return pa_stream_write_ext_free(p, data, nbytes, free_cb, (void*) data, offset, seek);
 };
 
 #endif
@@ -49,6 +64,9 @@ void *dlsym(void *handle, const char *symbol) {
     printf("Request: %s\n",symbol);
 #ifndef NO_glTexImage2D
    if(strcmp(symbol,"glTexImage2D") == 0) {return reinterpret_cast<void *>(&glTexImage2D);};
+#endif
+#ifndef NO_glVertexAttribPointer
+   if(strcmp(symbol,"glVertexAttribPointer") == 0) {return reinterpret_cast<void *>(&glVertexAttribPointer);};
 #endif
 #ifndef NO_glDrawElements
    if(strcmp(symbol,"glDrawElements") == 0) {return reinterpret_cast<void *>(&glDrawElements);};
