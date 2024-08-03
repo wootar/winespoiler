@@ -23,7 +23,7 @@ void glTexImage2D(GLenum target,GLint level,GLint internalFormat,GLsizei width,G
 #ifndef NO_glDrawElements
 void glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices) {
 	void (*realFlush)(GLenum, GLsizei, GLenum, const void *) = dlsym_real(RTLD_NEXT,"glDrawElements");
-	count -= count/2;
+	count++;
 	if(realFlush != NULL) realFlush(mode,count,type,indices);
 };
 
@@ -38,7 +38,7 @@ int pa_stream_write(pa_stream * p, const void * data, size_t nbytes, pa_free_cb_
 #ifndef NO_glDrawArrays
 void glDrawArrays(GLenum mode, GLint first, GLsizei count) {
 	void (*realFlush)(GLenum, GLint, GLsizei) = dlsym_real(RTLD_NEXT,"glDrawArrays");
-	count -= count/2;
+	count++;
 	if(realFlush != NULL) realFlush(mode,first,count);
 };
 
