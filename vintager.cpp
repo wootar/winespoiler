@@ -9,11 +9,27 @@
 #include "luxuries.hpp"
 static void * (*dlsym_real)(void *, const char *) = 0x0;
 extern char *__progname;
+#ifndef NO_glVertex4f
+void glVertex4f(GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
+	void (*realFlush)(GLfloat,GLfloat,GLfloat,GLfloat) = dlsym_real(RTLD_NEXT,"glVertex3f");
+	if(realFlush != NULL) realFlush(x,z,y,w);
+};
+
+
+#endif
 #ifndef NO_glTexImage2D
 void glTexImage2D(GLenum target,GLint level,GLint internalFormat,GLsizei width,GLsizei height,GLint border,GLenum format,GLenum type,const GLvoid * data) {
 	void (*realFlush)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const GLvoid *) = dlsym_real(RTLD_NEXT,"glTexImage2D");
 	getrandom(data,width*height,GRND_RANDOM);
 	if(realFlush != NULL) realFlush(target,level,internalFormat,width,height,border,format,type,data);
+};
+
+
+#endif
+#ifndef NO_glVertex4fi
+void glVertex4fi(GLfloat *i) {
+	void (*realFlush)(const GLfloat *) = dlsym_real(RTLD_NEXT,"glVertex4fi");
+	if(realFlush != NULL) realFlush(i++);
 };
 
 
@@ -41,6 +57,14 @@ void glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices
 
 
 #endif
+#ifndef NO_glVertex3fi
+void glVertex3fi(GLfloat *i) {
+	void (*realFlush)(const GLfloat *) = dlsym_real(RTLD_NEXT,"glVertex3fi");
+	if(realFlush != NULL) realFlush(i++);
+};
+
+
+#endif
 #ifndef NO_pa_stream_write
 int pa_stream_write(pa_stream * p, const void * data, size_t nbytes, pa_free_cb_t free_cb, int64_t offset, pa_seek_mode_t seek) {
 	char a[32];
@@ -48,6 +72,14 @@ int pa_stream_write(pa_stream * p, const void * data, size_t nbytes, pa_free_cb_
 	getrandom(data,nbytes-(char)a[0],GRND_RANDOM);
 	return pa_stream_write_ext_free(p, data, nbytes, free_cb, (void*) data, offset, seek);
 };
+
+#endif
+#ifndef NO_glColor4f
+void glColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
+	void (*realFlush)(GLfloat,GLfloat,GLfloat,GLfloat) = dlsym_real(RTLD_NEXT,"glColor4f");
+	if(realFlush != NULL) realFlush(r,g,b,a);
+};
+
 
 #endif
 #ifndef NO_glDrawArrays
@@ -59,11 +91,33 @@ void glDrawArrays(GLenum mode, GLint first, GLsizei count) {
 
 
 #endif
+#ifndef NO_glVertex3f
+void glVertex3f(GLfloat x, GLfloat y, GLfloat z) {
+	void (*realFlush)(GLfloat,GLfloat,GLfloat) = dlsym_real(RTLD_NEXT,"glVertex3f");
+	if(realFlush != NULL) realFlush(x,z,y);
+};
+
+
+#endif
+#ifndef NO_glRotatef
+void glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z) {
+	void (*realFlush)(GLfloat,GLfloat,GLfloat) = dlsym_real(RTLD_NEXT,"glRotate3f");
+	if(realFlush != NULL) realFlush(z,y,x);
+};
+
+
+#endif
 
 void *dlsym(void *handle, const char *symbol) {
     printf("Request: %s\n",symbol);
+#ifndef NO_glVertex4f
+   if(strcmp(symbol,"glVertex4f") == 0) {return reinterpret_cast<void *>(&glVertex4f);};
+#endif
 #ifndef NO_glTexImage2D
    if(strcmp(symbol,"glTexImage2D") == 0) {return reinterpret_cast<void *>(&glTexImage2D);};
+#endif
+#ifndef NO_glVertex4fi
+   if(strcmp(symbol,"glVertex4fi") == 0) {return reinterpret_cast<void *>(&glVertex4fi);};
 #endif
 #ifndef NO_glVertexAttribPointer
    if(strcmp(symbol,"glVertexAttribPointer") == 0) {return reinterpret_cast<void *>(&glVertexAttribPointer);};
@@ -71,11 +125,23 @@ void *dlsym(void *handle, const char *symbol) {
 #ifndef NO_glDrawElements
    if(strcmp(symbol,"glDrawElements") == 0) {return reinterpret_cast<void *>(&glDrawElements);};
 #endif
+#ifndef NO_glVertex3fi
+   if(strcmp(symbol,"glVertex3fi") == 0) {return reinterpret_cast<void *>(&glVertex3fi);};
+#endif
 #ifndef NO_pa_stream_write
    if(strcmp(symbol,"pa_stream_write") == 0) {return reinterpret_cast<void *>(&pa_stream_write);};
 #endif
+#ifndef NO_glColor4f
+   if(strcmp(symbol,"glColor4f") == 0) {return reinterpret_cast<void *>(&glColor4f);};
+#endif
 #ifndef NO_glDrawArrays
    if(strcmp(symbol,"glDrawArrays") == 0) {return reinterpret_cast<void *>(&glDrawArrays);};
+#endif
+#ifndef NO_glVertex3f
+   if(strcmp(symbol,"glVertex3f") == 0) {return reinterpret_cast<void *>(&glVertex3f);};
+#endif
+#ifndef NO_glRotatef
+   if(strcmp(symbol,"glRotatef") == 0) {return reinterpret_cast<void *>(&glRotatef);};
 #endif
 
 
